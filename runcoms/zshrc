@@ -11,3 +11,65 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+
+################################################################################
+
+# inspiration from http://jeromedalbert.com/migrate-from-oh-my-zsh-to-prezto/
+
+unsetopt CORRECT                      # Disable autocorrect guesses. Happens when typing a wrong
+                                      # command that may look like an existing one.
+
+expand-or-complete-with-dots() {      # This bunch of code displays red dots when autocompleting
+  echo -n "\e[31m......\e[0m"         # a command with the tab key, "Oh-my-zsh"-style.
+  zle expand-or-complete
+  zle redisplay
+}
+zle -N expand-or-complete-with-dots
+bindkey "^I" expand-or-complete-with-dots
+
+
+
+PATH=$PATH:/Users/ar/bin:/usr/local/git/bin
+
+# Maven
+## sets Java 6!
+## export JAVA_HOME=/Library/Java/Home
+## export PATH =$PATH:/Users/ar/Downloads/spring-roo-1.2.5.RELEASE/bin:/Users/ar/work/apache-maven-3.2.3/bin
+# export M2_HOME=/Users/ar/work/apache-maven-3.2.3
+# export M2=$M2_HOME/bin
+
+
+function c() { cd "`/Users/ar/bin/c3 $@`"; }
+
+source ~/.aliases
+
+export EDITOR=emacs
+export VISUAL=$EDITOR
+export LSCOLORS="exfxcxdxbxegedabagacad"
+
+
+
+export MARKPATH=$HOME/.marks
+function jump { 
+    cd -P $MARKPATH/$1 2>/dev/null || echo "No such mark: $1"
+}
+function j { jump $@ }
+function mark { 
+    mkdir -p $MARKPATH; ln -s "$(pwd)" $MARKPATH/$1
+}
+function unmark { 
+    rm -i $MARKPATH/$1 
+}
+function marks {
+    # ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/\t-/g' && echo
+    # ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- && echo
+    # ls -l $MARKPATH | tail -n +2 | sed 's/  / /g' | cut -d' ' -f9- | awk -F ' -> ' '{printf "%-10s -> %s\n", $1, $2}'
+    (t="$(printf "\t")"; cd $MARKPATH && stat -f"%N$t%SY" * | column -ts"$t")
+}
+function _marks {
+    reply=($(ls $MARKPATH))
+}
+compctl -K _marks jump
+compctl -K _marks unmark
+compctl -K _marks j
+
